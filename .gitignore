@@ -1,0 +1,35 @@
+# Зависимости и результаты сборки
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+
+# Переменные окружения и секреты
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Локальные базы данных и сопутствующие файлы SQLite
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# Локальные загрузки, журналы и временные файлы
+uploads/
+*.log
+*.tmp
+*.bak
+.cache/
+
+# Настройки редакторов и операционной системы
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

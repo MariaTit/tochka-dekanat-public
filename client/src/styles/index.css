@@ -1,0 +1,61 @@
+:root {
+  font-family: Inter, Manrope, system-ui, sans-serif;
+  color: #252336;
+  background: #f7f8fa;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+
+  --color-accent: #7464d9;
+  --color-muted: #59566c;
+  --color-error: #a12738;
+  --space-small: 1rem;
+  --space-large: 2rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 360px;
+}
+
+.start-page {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  place-items: center;
+  padding: var(--space-large) var(--space-small);
+}
+
+.intro {
+  width: 100%;
+  max-width: 40rem;
+  text-align: center;
+}
+
+.project-title {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: clamp(4rem, 12vw, 6rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1.15;
+}
+
+.project-description {
+  margin: var(--space-small) 0 0;
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+}
+
+.connection-status {
+  margin: var(--space-large) 0 0;
+  color: var(--color-muted);
+  font-size: 1rem;
+}
+
+.connection-status--error {
+  color: var(--color-error);
+}
