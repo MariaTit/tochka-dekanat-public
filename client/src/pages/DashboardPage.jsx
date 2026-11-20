@@ -1,22 +1,7 @@
-import { useState } from 'react';
-import { apiRequest } from '../api.js';
+import LogoutButton from '../components/LogoutButton.jsx';
 
-export default function DashboardPage({ user, onLogout, onLogoutStart, onLogoutEnd }) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState('');
+export default function DashboardPage({ user, ...logoutProps }) {
   const isStudent = user.role === 'student';
-
-  async function logout() {
-    if (pending) return;
-    setPending(true);
-    setError('');
-    onLogoutStart();
-    try {
-      await apiRequest('/auth/logout', { method: 'POST', body: '{}' });
-      onLogout();
-    } catch (failure) { setError(failure.message); }
-    finally { setPending(false); onLogoutEnd(); }
-  }
 
   return (
     <section className="auth-card profile-card" aria-labelledby="dashboard-title">
@@ -29,8 +14,7 @@ export default function DashboardPage({ user, onLogout, onLogoutStart, onLogoutE
         {isStudent && <div><dt>Группа</dt><dd>{user.studentGroup || 'Не указана'}</dd></div>}
         <div><dt>Подразделение</dt><dd>{user.department}</dd></div>
       </dl>
-      {error && <p className="error-message" role="alert">{error}</p>}
-      <button type="button" onClick={logout} disabled={pending}>{pending ? 'Выходим…' : 'Выйти из аккаунта'}</button>
+      <LogoutButton {...logoutProps} />
       <p className="demo-note">Демонстрационный профиль. Все данные вымышлены.</p>
     </section>
   );

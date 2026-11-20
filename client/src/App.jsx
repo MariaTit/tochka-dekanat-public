@@ -3,21 +3,32 @@ import { apiRequest } from './api.js';
 import ConnectionStatus from './components/ConnectionStatus.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import StudentLayout from './components/StudentLayout.jsx';
+import StudentHomePage from './pages/StudentHomePage.jsx';
+import StudentProfilePage from './pages/StudentProfilePage.jsx';
+import StudentMorePage from './pages/StudentMorePage.jsx';
+import StudentSectionPage from './pages/StudentSectionPage.jsx';
+import { isStudentPath } from './studentRoutes.js';
 
 export default function App() {
   const [state, setState] = useState({ status: 'loading', user: null, error: '' });
   const version = useRef(0);
   const busy = useRef(false);
+  const [path, setPath] = useState(window.location.pathname);
 
   const showUser = useCallback((user) => {
     version.current += 1;
-    window.history.replaceState(null, '', user.role === 'student' ? '/student' : '/staff');
+    const destination = user.role === 'student'
+      ? (isStudentPath(window.location.pathname) ? window.location.pathname : '/student') : '/staff';
+    window.history.replaceState(null, '', destination);
+    setPath(destination);
     setState({ status: 'authenticated', user, error: '' });
   }, []);
 
   const showLogin = useCallback(() => {
     version.current += 1;
     window.history.replaceState(null, '', '/login');
+    setPath('/login');
     setState({ status: 'anonymous', user: null, error: '' });
   }, []);
 
@@ -49,6 +60,27 @@ export default function App() {
     };
   }, [checkSession]);
 
+  function navigate(destination) {
+    if (!isStudentPath(destination) || destination === path) return;
+    window.history.pushState(null, '', destination);
+    setPath(destination);
+  }
+
+  const logoutProps = {
+    onLogout: showLogin,
+    onLogoutStart: () => { busy.current = true; version.current += 1; },
+    onLogoutEnd: () => { busy.current = false; },
+  };
+
+  if (state.status === 'authenticated' && state.user.role === 'student') {
+    let page;
+    if (path === '/student/profile') page = <StudentProfilePage user={state.user} />;
+    else if (path === '/student/more') page = <StudentMorePage onNavigate={navigate} {...logoutProps} />;
+    else if (path === '/student') page = <StudentHomePage user={state.user} onNavigate={navigate} />;
+    else page = <StudentSectionPage path={path} onNavigate={navigate} />;
+    return <StudentLayout path={path} onNavigate={navigate}>{page}</StudentLayout>;
+  }
+
   return (
     <main className="start-page">
       <header className="intro">
@@ -62,8 +94,7 @@ export default function App() {
         <button type="button" onClick={() => { setState({ status: 'loading', user: null, error: '' }); checkSession(); }}>Повторить проверку</button>
       </section>}
       {state.status === 'anonymous' && <LoginPage onLogin={showUser} />}
-      {state.status === 'authenticated' && <DashboardPage user={state.user} onLogout={showLogin}
-        onLogoutStart={() => { busy.current = true; version.current += 1; }} onLogoutEnd={() => { busy.current = false; }} />}
+      {state.status === 'authenticated' && <DashboardPage user={state.user} {...logoutProps} />}
     </main>
   );
 }
