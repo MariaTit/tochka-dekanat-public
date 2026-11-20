@@ -4,6 +4,7 @@ import session from 'express-session';
 import { SqliteSessionStore } from './db/session-store.js';
 import { createAuthRouter } from './routes/auth.js';
 import { protectMutation, requireAuth, requireRole } from './middleware/auth.js';
+import { createScheduleRouter } from './routes/schedule.js';
 
 export async function createApp(db, config) {
   const app = express();
@@ -24,6 +25,7 @@ export async function createApp(db, config) {
     cookie: { ...cookieOptions, maxAge: config.sessionTtlMs },
   }));
   app.use('/api/auth', await createAuthRouter(db, config, cookieOptions));
+  app.use('/api/student/schedule', createScheduleRouter(db));
   app.get('/api/student', requireAuth(db), requireRole('student'), (request, response) => response.json({ user: request.user }));
   app.get('/api/staff', requireAuth(db), requireRole('staff'), (request, response) => response.json({ user: request.user }));
   app.get('/api/users/:userId', requireAuth(db), (request, response) => {

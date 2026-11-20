@@ -1,14 +1,15 @@
 import EmptyState from '../components/EmptyState.jsx';
 import Icon from '../components/Icon.jsx';
 import StudentLink from '../components/StudentLink.jsx';
+import UpcomingLessons from '../components/UpcomingLessons.jsx';
 
 const QUICK_ACTIONS = [
   { to: '/student/profile', icon: 'user', title: 'Мой профиль', description: 'Личные и учебные сведения' },
-  { to: '/student/schedule', icon: 'calendar', title: 'Расписание', description: 'Информация о будущем разделе' },
+  { to: '/student/schedule', icon: 'calendar', title: 'Расписание', description: 'Занятия вашей группы и изменения' },
   { to: '/student/documents', icon: 'document', title: 'Документы', description: 'Информация о будущем разделе' },
 ];
 
-export default function StudentHomePage({ user, onNavigate }) {
+export default function StudentHomePage({ user, onNavigate, onSessionExpired }) {
   const firstName = user.fullName?.trim().split(/\s+/)[0];
   return <>
     <section className="welcome-panel" aria-labelledby="welcome-title">
@@ -21,7 +22,7 @@ export default function StudentHomePage({ user, onNavigate }) {
     <div className="overview-grid">
       <section className="student-card" aria-labelledby="classes-title">
         <div className="card-heading"><h2 id="classes-title">Ближайшие занятия</h2><StudentLink to="/student/schedule" onNavigate={onNavigate}>К расписанию</StudentLink></div>
-        <EmptyState icon="calendar" title="Расписание ещё не подключено">Когда раздел будет готов, здесь появятся ближайшие занятия. Сейчас учебных данных нет.</EmptyState>
+        <UpcomingLessons onSessionExpired={onSessionExpired} />
       </section>
       <section className="student-card" aria-labelledby="notifications-title">
         <div className="card-heading"><h2 id="notifications-title">Важные уведомления</h2></div>

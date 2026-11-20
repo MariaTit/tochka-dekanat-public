@@ -10,6 +10,7 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "setup": "node scripts/setup-demo.js",
+    "setup:schedule": "node scripts/setup-schedule.js",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {

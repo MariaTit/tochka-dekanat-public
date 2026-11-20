@@ -73,7 +73,7 @@ test('Авторизация и постоянные сессии SQLite', async
     assert.deepEqual(await createDemoUsers(db), []);
     assert.deepEqual(db.prepare('SELECT * FROM users ORDER BY id').all(), before);
     const second = openDatabase(databasePath);
-    assert.equal(second.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 1);
+    assert.ok(second.prepare('SELECT name FROM schema_migrations WHERE name = ?').get('001-auth.sql'));
     second.close();
   });
 

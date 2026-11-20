@@ -8,6 +8,8 @@ import StudentHomePage from './pages/StudentHomePage.jsx';
 import StudentProfilePage from './pages/StudentProfilePage.jsx';
 import StudentMorePage from './pages/StudentMorePage.jsx';
 import StudentSectionPage from './pages/StudentSectionPage.jsx';
+import StudentSchedulePage from './pages/StudentSchedulePage.jsx';
+import './styles/schedule.css';
 import { isStudentPath } from './studentRoutes.js';
 
 export default function App() {
@@ -76,7 +78,8 @@ export default function App() {
     let page;
     if (path === '/student/profile') page = <StudentProfilePage user={state.user} />;
     else if (path === '/student/more') page = <StudentMorePage onNavigate={navigate} {...logoutProps} />;
-    else if (path === '/student') page = <StudentHomePage user={state.user} onNavigate={navigate} />;
+    else if (path === '/student') page = <StudentHomePage user={state.user} onNavigate={navigate} onSessionExpired={showLogin} />;
+    else if (path === '/student/schedule') page = <StudentSchedulePage user={state.user} onSessionExpired={showLogin} />;
     else page = <StudentSectionPage path={path} onNavigate={navigate} />;
     return <StudentLayout path={path} onNavigate={navigate}>{page}</StudentLayout>;
   }
