@@ -7,11 +7,12 @@ import StudentLayout from './components/StudentLayout.jsx';
 import StudentHomePage from './pages/StudentHomePage.jsx';
 import StudentProfilePage from './pages/StudentProfilePage.jsx';
 import StudentMorePage from './pages/StudentMorePage.jsx';
-import StudentSectionPage from './pages/StudentSectionPage.jsx';
+import StudentDocumentsPage from './pages/StudentDocumentsPage.jsx';
 import StudentSchedulePage from './pages/StudentSchedulePage.jsx';
 import StudentGradesPage from './pages/StudentGradesPage.jsx';
 import './styles/schedule.css';
 import './styles/grades.css';
+import './styles/documents.css';
 import { isStudentPath } from './studentRoutes.js';
 
 export default function App() {
@@ -83,7 +84,7 @@ export default function App() {
     else if (path === '/student') page = <StudentHomePage user={state.user} onNavigate={navigate} onSessionExpired={showLogin} />;
     else if (path === '/student/schedule') page = <StudentSchedulePage user={state.user} onSessionExpired={showLogin} />;
     else if (path === '/student/grades') page = <StudentGradesPage onSessionExpired={showLogin} />;
-    else page = <StudentSectionPage path={path} onNavigate={navigate} />;
+    else if (path === '/student/documents') page = <StudentDocumentsPage onSessionExpired={showLogin} />;
     return <StudentLayout key={state.user.id} path={path} onNavigate={navigate}>{page}</StudentLayout>;
   }
 

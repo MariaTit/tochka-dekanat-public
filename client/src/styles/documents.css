@@ -1,0 +1,36 @@
+.documents-layout { display: grid; gap: 1.5rem; align-items: start; }
+.document-form-card > .muted { margin: 0.75rem 0 1.5rem; }
+.document-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.document-fields legend { padding: 0; margin-bottom: 0.75rem; font-weight: 600; }
+.document-type-options { display: grid; gap: 0.75rem; }
+.document-type-option { display: flex; align-items: center; gap: 0.75rem; margin: 0; padding: 0.875rem; border: 1px solid var(--color-border); border-radius: 0.75rem; cursor: pointer; font-weight: 400; }
+.document-type-option:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-soft); }
+.document-type-option input { flex: 0 0 1.125rem; width: 1.125rem; height: 1.125rem; min-height: 0; margin: 0; accent-color: var(--color-button); }
+.document-fields > label { display: block; margin-top: 1.5rem; }
+.document-optional { color: var(--color-muted); font-weight: 400; font-size: 0.875rem; }
+.document-fields textarea { display: block; width: 100%; min-width: 0; max-width: 100%; min-height: 7rem; resize: vertical; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 0.5rem; font: inherit; color: inherit; background: var(--color-surface); }
+.document-comment-help { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-muted); }
+.document-form-note, .document-list-note { color: var(--color-muted); font-size: 0.875rem; }
+.document-success { padding: 1rem 1.25rem; margin: 0 0 1.5rem; border: 1px solid var(--color-accent); border-radius: 0.75rem; color: var(--color-button); background: var(--color-accent-soft); }
+.document-request-list { display: grid; gap: 0.875rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
+.document-request-card { display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem; width: 100%; min-width: 0; padding: 1rem; text-align: left; font-weight: 400; line-height: 1.5; background: var(--color-surface); color: inherit; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow-wrap: anywhere; }
+.document-request-card:hover:not(:disabled) { background: var(--color-accent-soft); filter: none; }
+.document-request-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.document-request-number, .document-request-date { font-size: 0.875rem; color: var(--color-muted); }
+.document-request-name { font-weight: 650; }
+.document-status { display: inline-block; padding: 0.25rem 0.6rem; background: var(--color-accent-soft); color: var(--color-button); border-radius: 0.5rem; font-size: 0.875rem; }
+.document-details-hint { color: var(--color-button); font-size: 0.875rem; }
+.document-dialog { width: min(36rem, calc(100% - 2rem)); max-height: calc(100svh - 2rem); padding: 1.5rem; overflow: auto; overflow-wrap: anywhere; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); color: inherit; }
+.document-dialog::backdrop { background: #25233680; }
+.document-dialog .card-heading { align-items: start; }
+.document-dialog h2 { margin: 0; font-size: 1.25rem; }
+.document-request-data { display: grid; gap: 1.25rem; margin: 1.5rem 0 0; }
+.document-comment { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+@media (min-width: 1200px) {
+  .documents-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
+}
+@media (max-width: 767px) {
+  .documents-layout { gap: 1rem; }
+  .document-dialog { padding: 1.25rem; }
+}
