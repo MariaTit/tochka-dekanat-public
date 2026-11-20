@@ -11,6 +11,7 @@
     "start": "node src/index.js",
     "setup": "node scripts/setup-demo.js",
     "setup:schedule": "node scripts/setup-schedule.js",
+    "setup:grades": "node scripts/setup-grades.js",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {

@@ -2,6 +2,7 @@ import EmptyState from '../components/EmptyState.jsx';
 import Icon from '../components/Icon.jsx';
 import StudentLink from '../components/StudentLink.jsx';
 import UpcomingLessons from '../components/UpcomingLessons.jsx';
+import GradesOverview from '../components/GradesOverview.jsx';
 
 const QUICK_ACTIONS = [
   { to: '/student/profile', icon: 'user', title: 'Мой профиль', description: 'Личные и учебные сведения' },
@@ -29,6 +30,7 @@ export default function StudentHomePage({ user, onNavigate, onSessionExpired }) 
         <EmptyState icon="bell" title="Уведомления ещё не подключены">Здесь будут важные сообщения от учебного офиса. В этом прототипе они пока недоступны.</EmptyState>
       </section>
     </div>
+    <GradesOverview onNavigate={onNavigate} onSessionExpired={onSessionExpired} />
     <section className="quick-actions" aria-labelledby="actions-title"><h2 id="actions-title">Быстрые действия</h2>
       <div className="quick-actions-grid">{QUICK_ACTIONS.map((action) => <StudentLink key={action.to} to={action.to} onNavigate={onNavigate} className="action-card">
         <span className="action-icon"><Icon name={action.icon} /></span><div><h3>{action.title}</h3><p>{action.description}</p></div>

@@ -2,7 +2,6 @@ import EmptyState from '../components/EmptyState.jsx';
 import StudentLink from '../components/StudentLink.jsx';
 
 const SECTIONS = {
-  '/student/grades': { title: 'Оценки', icon: 'grades', description: 'Информация о вашей успеваемости.', detail: 'Раздел оценок пока не реализован. Учебные результаты и сведения об успеваемости ещё не подключены.' },
   '/student/documents': { title: 'Документы', icon: 'document', description: 'Будущий раздел документов и заявок.', detail: 'Заказ справок, отправка заявок и отслеживание их статусов пока недоступны. Этот раздел будет реализован в отдельном блоке.' },
 };
 
