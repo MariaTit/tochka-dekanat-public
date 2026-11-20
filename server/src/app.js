@@ -6,6 +6,7 @@ import { createAuthRouter } from './routes/auth.js';
 import { protectMutation, requireAuth, requireRole } from './middleware/auth.js';
 import { createScheduleRouter } from './routes/schedule.js';
 import { createGradesRouter } from './routes/grades.js';
+import { createDocumentsRouter } from './routes/documents.js';
 
 export async function createApp(db, config) {
   const app = express();
@@ -28,6 +29,7 @@ export async function createApp(db, config) {
   app.use('/api/auth', await createAuthRouter(db, config, cookieOptions));
   app.use('/api/student/schedule', createScheduleRouter(db));
   app.use('/api/student/grades', createGradesRouter(db));
+  app.use('/api/student/documents', createDocumentsRouter(db));
   app.get('/api/student', requireAuth(db), requireRole('student'), (request, response) => response.json({ user: request.user }));
   app.get('/api/staff', requireAuth(db), requireRole('staff'), (request, response) => response.json({ user: request.user }));
   app.get('/api/users/:userId', requireAuth(db), (request, response) => {
