@@ -40,7 +40,7 @@ test('Оценки: миграция существующей базы, изол
 
   await t.test('Новая миграция сохраняет прежние данные, хеши паролей и сессии', () => {
     assert.deepEqual(snapshot(), legacy);
-    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 4);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 5);
     for (const table of ['disciplines', 'student_disciplines', 'current_results', 'attestations']) {
       assert.equal(db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count, 0);
     }

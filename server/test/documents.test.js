@@ -43,7 +43,7 @@ test('Документы: миграция, подача, валидация, д
   await t.test('Миграция старой базы сохраняет все таблицы, пароли и сессии; повторное открытие безопасно', () => {
     assert.deepEqual(snapshot(), legacy);
     assert.deepEqual(db.prepare('SELECT name FROM schema_migrations ORDER BY name').all().map((row) => row.name),
-      ['001-auth.sql', '002-schedule.sql', '003-grades.sql', '004-documents.sql']);
+      ['001-auth.sql', '002-schedule.sql', '003-grades.sql', '004-documents.sql', '005-document-processing.sql']);
     assert.equal(db.prepare('SELECT COUNT(*) AS count FROM document_requests').get().count, 0);
     const before = snapshot(['document_types', 'schema_migrations']);
     const second = openDatabase(databasePath);
@@ -134,7 +134,8 @@ test('Документы: миграция, подача, валидация, д
         const data = await response.json();
         assert.deepEqual(Object.keys(data), ['request']);
         const item = data.request;
-        assert.deepEqual(Object.keys(item).sort(), ['comment', 'createdAt', 'documentType', 'id', 'status', 'studentId']);
+        assert.deepEqual(Object.keys(item).sort(), ['comment', 'createdAt', 'documentType', 'id', 'rejectionReason', 'status', 'studentId']);
+        assert.equal(item.rejectionReason, null);
         assert.ok(Number.isSafeInteger(item.id) && item.id > 0);
         assert.equal(item.studentId, studentIds[login]);
         assert.equal(item.documentType.code, body.documentTypeCode);
@@ -229,7 +230,7 @@ test('Документы: миграция, подача, валидация, д
     assert.deepEqual(storedRequests(), before);
   });
 
-  await t.test('Изменение, удаление, обработка сотрудником и создание типов через API отсутствуют', async () => {
+  await t.test('Изменение, удаление через API студента и создание типов отсутствуют', async () => {
     const before = storedRequests();
     for (const login of ['student1', 'staff']) {
       for (const method of ['PUT', 'PATCH', 'DELETE']) {
@@ -239,7 +240,6 @@ test('Документы: миграция, подача, валидация, д
       assert.equal((await request(`${base}/types`, cookies[login], { method: 'POST', body: validBody })).status,
         login === 'staff' ? 403 : 404);
     }
-    assert.equal((await request('/staff/documents/requests', cookies.staff)).status, 404);
     assert.deepEqual(storedRequests(), before);
   });
 

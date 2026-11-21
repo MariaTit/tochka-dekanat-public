@@ -8,5 +8,11 @@ export function formatRequestDate(value) {
 }
 
 export function requestStatusLabel(status) {
-  return status === 'submitted' ? 'Подана' : 'Неизвестный статус';
+  switch (status) {
+    case 'submitted': return 'Подана';
+    case 'in_progress': return 'В работе';
+    case 'ready': return 'Готова';
+    case 'rejected': return 'Отклонена';
+    default: return 'Неизвестный статус';
+  }
 }
