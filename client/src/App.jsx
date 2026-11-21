@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest } from './api.js';
 import ConnectionStatus from './components/ConnectionStatus.jsx';
 import LoginPage from './pages/LoginPage.jsx';
-import DashboardPage from './pages/DashboardPage.jsx';
+import StaffDocumentsPage from './pages/StaffDocumentsPage.jsx';
 import StudentLayout from './components/StudentLayout.jsx';
 import StudentHomePage from './pages/StudentHomePage.jsx';
 import StudentProfilePage from './pages/StudentProfilePage.jsx';
@@ -13,6 +13,7 @@ import StudentGradesPage from './pages/StudentGradesPage.jsx';
 import './styles/schedule.css';
 import './styles/grades.css';
 import './styles/documents.css';
+import './styles/staff-documents.css';
 import { isStudentPath } from './studentRoutes.js';
 
 export default function App() {
@@ -88,6 +89,10 @@ export default function App() {
     return <StudentLayout key={state.user.id} path={path} onNavigate={navigate}>{page}</StudentLayout>;
   }
 
+  if (state.status === 'authenticated' && state.user.role === 'staff') {
+    return <StaffDocumentsPage key={state.user.id} user={state.user} onSessionExpired={showLogin} {...logoutProps} />;
+  }
+
   return (
     <main className="start-page">
       <header className="intro">
@@ -101,7 +106,6 @@ export default function App() {
         <button type="button" onClick={() => { setState({ status: 'loading', user: null, error: '' }); checkSession(); }}>Повторить проверку</button>
       </section>}
       {state.status === 'anonymous' && <LoginPage onLogin={showUser} />}
-      {state.status === 'authenticated' && <DashboardPage user={state.user} {...logoutProps} />}
     </main>
   );
 }
