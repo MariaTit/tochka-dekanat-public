@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { SERVER_ROOT, config, validateConfig } from '../src/config.js';
 import { openDatabase } from '../src/db/database.js';
 import { createDemoUsers } from '../src/services/demo-users.js';
+import { runDemoInitialization } from '../src/services/demo-initialization.js';
 
 const envPath = path.join(SERVER_ROOT, '.env');
 if (config.production) {
@@ -18,10 +19,14 @@ if (config.production) {
 
 const db = openDatabase(config.databasePath);
 try {
-  const accounts = await createDemoUsers(db);
-  if (!accounts.length) console.log('Демонстрационные аккаунты уже существуют. Их пароли и данные не изменены.');
-  for (const account of accounts) {
-    console.log(`Логин: ${account.login} | Пароль: ${account.password} | Роль: ${account.role}`);
+  if (config.production) {
+    if (!await runDemoInitialization(db)) process.exitCode = 1;
+  } else {
+    const accounts = await createDemoUsers(db);
+    if (!accounts.length) console.log('Демонстрационные аккаунты уже существуют. Их пароли и данные не изменены.');
+    for (const account of accounts) {
+      console.log(`Логин: ${account.login} | Пароль: ${account.password} | Роль: ${account.role}`);
+    }
+    if (accounts.length) console.log('Сохраните пароли в менеджере паролей: повторно показать их из базы невозможно.');
   }
-  if (accounts.length) console.log('Сохраните пароли в менеджере паролей: повторно показать их из базы невозможно.');
 } finally { db.close(); }

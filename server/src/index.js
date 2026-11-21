@@ -1,11 +1,16 @@
 import { createApp } from './app.js';
 import { config, validateConfig } from './config.js';
 import { openDatabase } from './db/database.js';
+import { runDemoInitialization } from './services/demo-initialization.js';
 
 const HOST = config.host;
 console.log(`Режим запуска: ${config.production ? 'production' : 'development'} (NODE_ENV=production: ${process.env.NODE_ENV === 'production'}; AMVERA=1: ${process.env.AMVERA === '1'}; Secure cookies: ${config.production}; trust proxy: ${config.trustProxy})`);
 validateConfig();
 const db = openDatabase(config.databasePath);
+if (!await runDemoInitialization(db)) {
+  db.close();
+  process.exit(1);
+}
 const app = await createApp(db, config);
 const PORT = config.port;
 
