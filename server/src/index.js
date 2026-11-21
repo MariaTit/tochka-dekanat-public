@@ -2,14 +2,14 @@ import { createApp } from './app.js';
 import { config, validateConfig } from './config.js';
 import { openDatabase } from './db/database.js';
 
-const HOST = '127.0.0.1';
+const HOST = config.host;
 validateConfig();
 const db = openDatabase(config.databasePath);
 const app = await createApp(db, config);
 const PORT = config.port;
 
 const server = app.listen(PORT, HOST, () => {
-  console.log(`Сервер «Точка» запущен: http://${HOST}:${server.address().port}`);
+  console.log(`Сервер «Точка» запущен: http://127.0.0.1:${server.address().port} (прослушивание ${HOST})`);
 });
 
 server.on('error', (error) => {

@@ -6,12 +6,16 @@ export const SERVER_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const envPath = path.join(SERVER_ROOT, '.env');
 if (existsSync(envPath)) process.loadEnvFile(envPath);
 
+const production = process.env.NODE_ENV === 'production';
+
 export const config = {
   port: Number(process.env.PORT || 3001),
-  databasePath: process.env.DATABASE_PATH || path.join(SERVER_ROOT, 'data', 'tochka.sqlite'),
+  host: production ? '0.0.0.0' : '127.0.0.1',
+  databasePath: process.env.DATABASE_PATH || (production ? '/data/tochka.sqlite' : path.join(SERVER_ROOT, 'data', 'tochka.sqlite')),
+  clientDistPath: fileURLToPath(new URL('../../client/dist/', import.meta.url)),
   sessionSecret: process.env.SESSION_SECRET,
   sessionTtlMs: 8 * 60 * 60 * 1000,
-  production: process.env.NODE_ENV === 'production',
+  production,
   trustProxy: process.env.TRUST_PROXY === '1',
   origins: (process.env.APP_ORIGINS || 'http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:3001,http://localhost:3001')
     .split(',').map((origin) => origin.trim()),
@@ -24,7 +28,15 @@ export function validateConfig() {
   if (!Number.isInteger(config.port) || config.port < 0 || config.port > 65535) {
     throw new Error('Некорректный PORT.');
   }
-  if (config.production && (!process.env.APP_ORIGINS || config.origins.some((origin) => !origin.startsWith('https://')))) {
+  if (config.production && (!process.env.APP_ORIGINS || config.origins.some((origin) => {
+    try {
+      const url = new URL(origin);
+      return url.protocol !== 'https:' || url.origin !== origin;
+    } catch { return true; }
+  }))) {
     throw new Error('В production укажите APP_ORIGINS с HTTPS-адресом приложения.');
+  }
+  if (config.production && !path.isAbsolute(config.databasePath)) {
+    throw new Error('В production DATABASE_PATH должен быть абсолютным путём, например /data/tochka.sqlite.');
   }
 }

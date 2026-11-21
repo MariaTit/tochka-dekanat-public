@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import healthRouter from './routes/health.js';
 import session from 'express-session';
 import { SqliteSessionStore } from './db/session-store.js';
@@ -10,6 +12,7 @@ import { createDocumentsRouter } from './routes/documents.js';
 import { createStaffDocumentsRouter } from './routes/staff-documents.js';
 
 export async function createApp(db, config) {
+  const clientDistPath = config.clientDistPath || fileURLToPath(new URL('../../client/dist/', import.meta.url));
   const app = express();
   app.disable('x-powered-by');
   if (config.trustProxy) app.set('trust proxy', 1);
@@ -44,6 +47,16 @@ export async function createApp(db, config) {
   app.use('/api', (request, response) => {
     response.status(404).json({ error: 'Маршрут API не найден' });
   });
+  if (config.production) {
+    app.use(express.static(clientDistPath, { index: false, dotfiles: 'ignore' }));
+    // Обновление вложенного адреса кабинета должно загружать React.
+    // Неизвестные API и отсутствующие файлы не подменяются HTML.
+    app.get(/^(?:\/$|\/login\/?$|\/student(?:\/.*)?$|\/staff\/?$)/, (request, response, next) => {
+      if (path.extname(request.path) || !request.accepts('html')) return next();
+      response.set('Cache-Control', 'no-cache');
+      response.sendFile('index.html', { root: clientDistPath });
+    });
+  }
   app.use((error, request, response, next) => {
     if (response.headersSent) return next(error);
     const status = error.status === 400 ? 400 : error.status === 413 ? 413 : 500;

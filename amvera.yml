@@ -1,0 +1,18 @@
+meta:
+  environment: node
+  toolchain:
+    name: npm
+    version: "24"
+build:
+  additionalCommands: npm run build
+  artifacts:
+    "package.json": /
+    "server/package.json": /server
+    "server/src": /server
+    "server/scripts": /server
+    "server/node_modules": /server
+    "client/dist": /client
+run:
+  command: npm start
+  containerPort: 3001
+  persistenceMount: /data

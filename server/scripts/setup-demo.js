@@ -1,12 +1,15 @@
 import { existsSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
-import { SERVER_ROOT, config } from '../src/config.js';
+import { SERVER_ROOT, config, validateConfig } from '../src/config.js';
 import { openDatabase } from '../src/db/database.js';
 import { createDemoUsers } from '../src/services/demo-users.js';
 
 const envPath = path.join(SERVER_ROOT, '.env');
-if (!existsSync(envPath)) {
+if (config.production) {
+  // В облаке секрет задаётся в окружении и сохраняется между публикациями.
+  validateConfig();
+} else if (!existsSync(envPath)) {
   writeFileSync(envPath, `SESSION_SECRET=${randomBytes(48).toString('base64url')}\nNODE_ENV=development\n`, { flag: 'wx', mode: 0o600 });
   console.log('Создан локальный server/.env с секретом сессий. Он исключён из Git.');
 } else if (!config.sessionSecret || Buffer.byteLength(config.sessionSecret) < 32) {

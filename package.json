@@ -1,0 +1,13 @@
+{
+  "name": "tochka-dekanat",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "npm --prefix client ci --include=dev && npm --prefix client run build && npm --prefix server ci --omit=dev",
+    "start": "node server/src/index.js",
+    "test": "npm --prefix server test"
+  }
+}
