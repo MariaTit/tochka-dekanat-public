@@ -83,17 +83,26 @@ test('Production: React, API и закрытые файлы на одном се
 test('Production: окружение, порт, HTTPS origins и отдельный абсолютный путь базы', () => {
   const source = `import { config, validateConfig } from './server/src/config.js';
     validateConfig();
-    console.log(JSON.stringify({ host: config.host, port: config.port, databasePath: config.databasePath }));`;
+    console.log(JSON.stringify({ production: config.production, host: config.host, port: config.port, databasePath: config.databasePath }));`;
   function inspect(extra = {}) {
     return spawnSync(process.execPath, ['--input-type=module', '--eval', source], {
       cwd: root, windowsHide: true, encoding: 'utf8',
-      env: { ...process.env, NODE_ENV: 'production', SESSION_SECRET: secret,
+      env: { ...process.env, NODE_ENV: 'production', AMVERA: '', SESSION_SECRET: secret,
         PORT: '3001', DATABASE_PATH: '', APP_ORIGINS: 'https://tochka.example', ...extra },
     });
   }
   const valid = inspect();
   assert.equal(valid.status, 0, valid.stderr);
-  assert.deepEqual(JSON.parse(valid.stdout), { host: '0.0.0.0', port: 3001, databasePath: '/data/tochka.sqlite' });
+  const productionConfig = { production: true, host: '0.0.0.0', port: 3001, databasePath: '/data/tochka.sqlite' };
+  assert.deepEqual(JSON.parse(valid.stdout), productionConfig);
+  for (const nodeEnv of [undefined, '', 'development', 'production']) {
+    const amvera = inspect({ NODE_ENV: nodeEnv, AMVERA: '1' });
+    assert.equal(amvera.status, 0, amvera.stderr);
+    assert.deepEqual(JSON.parse(amvera.stdout), productionConfig);
+  }
+  for (const extra of [{ APP_ORIGINS: '' }, { DATABASE_PATH: 'data/tochka.sqlite' }, { SESSION_SECRET: '' }]) {
+    assert.notEqual(inspect({ NODE_ENV: 'development', AMVERA: '1', ...extra }).status, 0);
+  }
   const localData = path.join(directory, 'other-data', 'test.sqlite');
   const override = inspect({ DATABASE_PATH: localData, PORT: '3101' });
   assert.equal(override.status, 0, override.stderr);
@@ -113,4 +122,10 @@ test('Production: окружение, порт, HTTPS origins и отдельн�
   assert.equal(development.status, 0, development.stderr);
   assert.equal(JSON.parse(development.stdout).host, '127.0.0.1');
   assert.equal(JSON.parse(development.stdout).databasePath, path.join(root, 'server', 'data', 'tochka.sqlite'));
+  for (const amvera of ['', '0', 'false']) {
+    const local = inspect({ NODE_ENV: 'development', AMVERA: amvera });
+    assert.equal(local.status, 0, local.stderr);
+    assert.equal(JSON.parse(local.stdout).production, false);
+    assert.equal(JSON.parse(local.stdout).host, '127.0.0.1');
+  }
 });

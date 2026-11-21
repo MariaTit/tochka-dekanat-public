@@ -3,6 +3,7 @@ import { config, validateConfig } from './config.js';
 import { openDatabase } from './db/database.js';
 
 const HOST = config.host;
+console.log(`Режим запуска: ${config.production ? 'production' : 'development'} (NODE_ENV=production: ${process.env.NODE_ENV === 'production'}; AMVERA=1: ${process.env.AMVERA === '1'}; Secure cookies: ${config.production}; trust proxy: ${config.trustProxy})`);
 validateConfig();
 const db = openDatabase(config.databasePath);
 const app = await createApp(db, config);

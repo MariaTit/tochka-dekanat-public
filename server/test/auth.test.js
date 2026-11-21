@@ -20,7 +20,7 @@ const secret = randomBytes(48).toString('base64url');
 async function startServer(extraEnv = {}) {
   const child = spawn(process.execPath, ['src/index.js'], {
     cwd: path.join(root, 'server'), windowsHide: true,
-    env: { ...process.env, DATABASE_PATH: databasePath, SESSION_SECRET: secret, PORT: '0', NODE_ENV: 'test', TRUST_PROXY: '0', ...extraEnv },
+    env: { ...process.env, DATABASE_PATH: databasePath, SESSION_SECRET: secret, PORT: '0', NODE_ENV: 'test', AMVERA: '', TRUST_PROXY: '0', ...extraEnv },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let output = '';
@@ -36,7 +36,7 @@ async function startServer(extraEnv = {}) {
     child.once('error', (error) => { clearTimeout(timeout); reject(error); });
     child.once('exit', (code) => { clearTimeout(timeout); reject(new Error(`Сервер завершился: ${code}; ${errors}`)); });
   });
-  return { url, async stop() { if (child.exitCode !== null) return; const closed = once(child, 'exit'); child.kill(); await closed; } };
+  return { url, output, async stop() { if (child.exitCode !== null) return; const closed = once(child, 'exit'); child.kill(); await closed; } };
 }
 
 test('Авторизация и постоянные сессии SQLite', async (t) => {
@@ -185,17 +185,24 @@ test('Авторизация и постоянные сессии SQLite', async
     assert.ok(response.headers.get('retry-after'));
   });
 
-  await t.test('Production выдаёт Secure cookie только через HTTPS', async () => {
-    await server.stop();
-    server = await startServer({ NODE_ENV: 'production', APP_ORIGINS: 'https://tochka.example', TRUST_PROXY: '1' });
-    const response = await request('/auth/login', {
-      method: 'POST', body: { login: accounts[2].login, password: accounts[2].password },
-      headers: { Origin: 'https://tochka.example', 'X-Forwarded-Proto': 'https' },
+  for (const mode of [{ NODE_ENV: 'production' }, { NODE_ENV: 'development', AMVERA: '1' }]) {
+    await t.test(`${mode.AMVERA ? 'Amvera без NODE_ENV=production' : 'Production'} выдаёт Secure cookie только через HTTPS`, async () => {
+      await server.stop();
+      server = await startServer({ ...mode, APP_ORIGINS: 'https://tochka.example', TRUST_PROXY: '1' });
+      assert.match(server.output, /Режим запуска: production/);
+      assert.match(server.output, /прослушивание 0\.0\.0\.0/);
+      assert.ok(!server.output.includes(secret));
+      if (mode.AMVERA) assert.match(server.output, /NODE_ENV=production: false; AMVERA=1: true/);
+      const response = await request('/auth/login', {
+        method: 'POST', body: { login: accounts[2].login, password: accounts[2].password },
+        headers: { Origin: 'https://tochka.example', 'X-Forwarded-Proto': 'https' },
+      });
+      assert.equal(response.status, 200);
+      assert.match(response.headers.get('set-cookie'), /; Secure/);
+      assert.match(response.headers.get('set-cookie'), /; HttpOnly/);
+      assert.match(response.headers.get('set-cookie'), /; SameSite=Lax/);
+      const plain = await request('/auth/login', { method: 'POST', body: { login: accounts[2].login, password: accounts[2].password } });
+      assert.equal(plain.headers.get('set-cookie'), null);
     });
-    assert.equal(response.status, 200);
-    assert.match(response.headers.get('set-cookie'), /; Secure/);
-    assert.match(response.headers.get('set-cookie'), /; HttpOnly/);
-    const plain = await request('/auth/login', { method: 'POST', body: { login: accounts[2].login, password: accounts[2].password } });
-    assert.equal(plain.headers.get('set-cookie'), null);
-  });
+  }
 });

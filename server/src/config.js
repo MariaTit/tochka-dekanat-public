@@ -6,7 +6,8 @@ export const SERVER_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const envPath = path.join(SERVER_ROOT, '.env');
 if (existsSync(envPath)) process.loadEnvFile(envPath);
 
-const production = process.env.NODE_ENV === 'production';
+// Amvera автоматически задаёт AMVERA=1, даже если NODE_ENV не дошёл до процесса.
+const production = process.env.NODE_ENV === 'production' || process.env.AMVERA === '1';
 
 export const config = {
   port: Number(process.env.PORT || 3001),
