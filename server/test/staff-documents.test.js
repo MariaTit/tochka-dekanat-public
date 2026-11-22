@@ -1,3 +1,4 @@
+import { LEGACY_ATTESTATION_COLUMNS } from './helpers/legacy-grades.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync } from 'node:fs';
@@ -8,7 +9,7 @@ import { once } from 'node:events';
 import { randomBytes } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { openDatabase } from '../src/db/database.js';
-import { createDemoUsers } from '../src/services/demo-users.js';
+import { createLegacyDemoUsers, LEGACY_USER_COLUMNS } from './helpers/legacy-demo-users.js';
 import { createDemoSchedule } from '../src/services/demo-schedule.js';
 import { createDemoGrades } from '../src/services/demo-grades.js';
 import { requestStatusLabel } from '../../client/src/documentRequests.js';
@@ -25,7 +26,7 @@ test('Сотрудник: миграция с заявками, обработк
     db.exec(readFileSync(new URL(`../src/db/migrations/${name}`, import.meta.url), 'utf8'));
     db.prepare('INSERT INTO schema_migrations (name) VALUES (?)').run(name);
   }
-  const accounts = await createDemoUsers(db);
+  const accounts = await createLegacyDemoUsers(db);
   const ids = Object.fromEntries(accounts.map((account) => [account.login, account.id]));
   createDemoSchedule(db);
   createDemoGrades(db);
@@ -39,7 +40,7 @@ test('Сотрудник: миграция с заявками, обработк
   const oldTables = ['roles', 'users', 'sessions', 'schedule_lessons', 'schedule_imports',
     'disciplines', 'student_disciplines', 'current_results', 'attestations', 'grades_imports', 'document_types'];
   const snapshot = (tables = oldTables) => Object.fromEntries(tables
-    .map((table) => [table, db.prepare(`SELECT * FROM ${table} ORDER BY 1`).all()]));
+    .map((table) => [table, db.prepare(`SELECT ${table === 'users' ? LEGACY_USER_COLUMNS : table === 'attestations' ? LEGACY_ATTESTATION_COLUMNS : '*'} FROM ${table} ORDER BY 1`).all()]));
   const storedRequests = () => db.prepare('SELECT * FROM document_requests ORDER BY id').all();
   const legacy = snapshot();
   const legacyRequests = storedRequests();
@@ -53,7 +54,7 @@ test('Сотрудник: миграция с заявками, обработк
       assert.equal(rejection_reason, null);
       return row;
     }), legacyRequests.map((row) => ({ ...row })));
-    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 5);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 9);
     assert.equal(db.prepare('PRAGMA integrity_check').get().integrity_check, 'ok');
     assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(), []);
     const before = snapshot([...oldTables, 'document_requests', 'schema_migrations']);

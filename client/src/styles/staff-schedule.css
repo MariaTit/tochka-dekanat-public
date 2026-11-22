@@ -1,0 +1,18 @@
+.staff-navigation { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.staff-navigation a { padding: 0.75rem 1rem; border: 1px solid var(--color-border); border-radius: 0.75rem; text-decoration: none; color: var(--color-button); }
+.staff-navigation a[aria-current="page"] { background: var(--color-accent-soft); border-color: var(--color-accent); }
+.staff-schedule-selection { margin-bottom: 1.5rem; }
+.staff-schedule-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; padding: 0; margin: 1.25rem 0; border: 0; min-width: 0; }
+.staff-schedule-fields > label, .staff-schedule-fields > div { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; margin: 0; }
+.staff-schedule-fields label { margin: 0; }
+.staff-schedule-fields input, .staff-schedule-fields select { width: 100%; min-width: 0; max-width: 100%; margin: 0; }
+.staff-schedule-fields select { min-height: 2.75rem; padding: 0.65rem; border: 1px solid var(--color-border); border-radius: 0.5rem; color: inherit; background: var(--color-surface); font: inherit; }
+.staff-schedule-panel .card-heading { flex-wrap: wrap; }
+.staff-lesson-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.staff-lesson-list .lesson-card { height: 100%; }
+.staff-lesson-dialog .staff-schedule-fields { margin-top: 1.5rem; }
+@media (max-width: 1023px) { .staff-lesson-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) {
+  .staff-schedule-fields, .staff-lesson-list { grid-template-columns: minmax(0, 1fr); }
+  .staff-schedule-panel .card-heading { align-items: stretch; flex-direction: column; }
+}

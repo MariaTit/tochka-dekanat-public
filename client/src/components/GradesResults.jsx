@@ -4,7 +4,8 @@ function ResultValue({ result, current }) {
   if (!result || (current ? result.points === null : result.result === null)) {
     return <span className="muted">Нет результата</span>;
   }
-  return <strong className="grade-value">{current ? `${result.points} из ${result.maxPoints} баллов` : result.result}</strong>;
+  return <strong className="grade-value">{current ? `${result.points} из ${result.maxPoints} баллов`
+    : `${result.result}${result.differentiated && result.grade !== null ? ` · оценка ${result.grade}` : ''}`}</strong>;
 }
 
 function ResultStatus({ result, current }) {
@@ -20,7 +21,7 @@ export default function GradesResults({ disciplines, current }) {
     .map((result) => ({ discipline, result, key: `${discipline.id}-${result?.id ?? 'empty'}` })));
   const rules = [...new Set(rows.map(({ result }) => current ? result?.scaleRules : result?.gradingRules).filter(Boolean))];
   const typeLabel = current ? 'Вид контроля' : 'Вид аттестации';
-  const type = (result) => (current ? result?.controlType : TYPES[result?.type]) || 'Не указан';
+  const type = (result) => (current ? result?.controlType : result?.differentiated ? 'Дифференцированный зачёт' : TYPES[result?.type]) || 'Не указан';
   return <>
     <table className="grades-table">
       <caption className="visually-hidden">{current ? 'Текущие результаты по дисциплинам' : 'Результаты экзаменов и зачётов'}</caption>

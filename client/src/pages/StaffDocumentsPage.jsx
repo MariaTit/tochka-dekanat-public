@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import LogoutButton from '../components/LogoutButton.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import DocumentRequestDetails from '../components/DocumentRequestDetails.jsx';
 import useApiResource from '../hooks/useApiResource.js';
@@ -7,7 +6,7 @@ import { formatRequestDate, requestStatusLabel } from '../documentRequests.js';
 
 const FILTERS = ['all', 'submitted', 'in_progress', 'ready', 'rejected'];
 
-export default function StaffDocumentsPage({ user, onSessionExpired, ...logoutProps }) {
+export default function StaffDocumentsPage({ onSessionExpired }) {
   const state = useApiResource('/staff/documents/requests', onSessionExpired);
   const [filter, setFilter] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
@@ -27,24 +26,9 @@ export default function StaffDocumentsPage({ user, onSessionExpired, ...logoutPr
     (opener.current?.isConnected ? opener.current : refreshButton.current)?.focus();
   }
 
-  return <div className="staff-shell">
-    <a className="skip-link" href="#staff-content">Перейти к заявкам</a>
-    <header className="staff-header">
-      <div><span className="student-brand">точка.</span><p className="header-caption">Кабинет сотрудника деканата</p></div>
-      <div className="staff-account"><span>{user.fullName}</span><LogoutButton {...logoutProps} /></div>
-    </header>
-    <main className="staff-content" id="staff-content" tabIndex={-1}>
+  return <>
       <div className="page-heading"><p className="eyebrow">Учебный офис</p><h1>Заявки студентов</h1>
         <p>Просматривайте обращения и готовьте справки для студентов.</p></div>
-      <details className="staff-profile"><summary>Мой профиль</summary>
-        <dl className="student-profile-data">
-          <div><dt>ФИО</dt><dd>{user.fullName}</dd></div>
-          <div><dt>Роль</dt><dd>Сотрудник учебного офиса</dd></div>
-          <div><dt>Логин</dt><dd>{user.login}</dd></div>
-          <div><dt>Электронная почта</dt><dd>{user.email}</dd></div>
-          <div><dt>Подразделение</dt><dd>{user.department || 'Не указано'}</dd></div>
-        </dl>
-      </details>
       {success && <p className="document-success" role="status">{success}</p>}
       <section className="student-card" aria-labelledby="staff-requests-title">
         <div className="card-heading"><h2 id="staff-requests-title">Все заявки</h2>
@@ -82,10 +66,7 @@ export default function StaffDocumentsPage({ user, onSessionExpired, ...logoutPr
           </ul>
         </>}
       </section>
-    </main>
-    <footer className="staff-footer"><span className="concept-label">Конкурсный прототип</span>
-      <p>Демонстрационные профили. Все персональные данные вымышлены.</p></footer>
     {selectedId !== null && <DocumentRequestDetails key={selectedId} requestId={selectedId} staff
       onClose={onClose} onSessionExpired={onSessionExpired} onUpdated={onUpdated} />}
-  </div>;
+  </>;
 }

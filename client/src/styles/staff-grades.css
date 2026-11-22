@@ -1,0 +1,13 @@
+.staff-grade-selection { margin-bottom: 1.5rem; }
+.staff-grade-selection .card-heading { flex-wrap: wrap; gap: 1rem; }
+.staff-grade-results { min-width: 0; }
+.staff-grade-results h3 { margin-top: 1.75rem; font-size: 1rem; }
+.staff-grade-results .grades-demo-note { margin-top: 0.75rem; }
+.staff-grade-editor { border-top: 1px solid var(--color-border); margin-top: 1rem; }
+.staff-grade-results .grades-rules { margin-bottom: 1.5rem; }
+.staff-grade-results select, .staff-grade-selection select { appearance: none; padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%235b536d' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.65rem center; background-size: 1rem; }
+@media (max-width: 767px) {
+  .staff-grade-selection .card-heading { align-items: stretch; flex-direction: column; }
+}

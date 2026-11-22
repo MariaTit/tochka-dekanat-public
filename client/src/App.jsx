@@ -3,6 +3,9 @@ import { apiRequest } from './api.js';
 import ConnectionStatus from './components/ConnectionStatus.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import StaffDocumentsPage from './pages/StaffDocumentsPage.jsx';
+import StaffSchedulePage from './pages/StaffSchedulePage.jsx';
+import StaffGradesPage from './pages/StaffGradesPage.jsx';
+import StaffLayout from './components/StaffLayout.jsx';
 import StudentLayout from './components/StudentLayout.jsx';
 import StudentHomePage from './pages/StudentHomePage.jsx';
 import StudentProfilePage from './pages/StudentProfilePage.jsx';
@@ -10,11 +13,17 @@ import StudentMorePage from './pages/StudentMorePage.jsx';
 import StudentDocumentsPage from './pages/StudentDocumentsPage.jsx';
 import StudentSchedulePage from './pages/StudentSchedulePage.jsx';
 import StudentGradesPage from './pages/StudentGradesPage.jsx';
+import StudentNotificationsPage from './pages/StudentNotificationsPage.jsx';
+import './styles/notifications.css';
 import './styles/schedule.css';
 import './styles/grades.css';
 import './styles/documents.css';
 import './styles/staff-documents.css';
+import './styles/staff-schedule.css';
+import './styles/staff-grades.css';
 import { isStudentPath } from './studentRoutes.js';
+
+const isStaffPath = (path) => ['/staff', '/staff/schedule', '/staff/grades'].includes(path);
 
 export default function App() {
   const [state, setState] = useState({ status: 'loading', user: null, error: '' });
@@ -25,7 +34,8 @@ export default function App() {
   const showUser = useCallback((user) => {
     version.current += 1;
     const destination = user.role === 'student'
-      ? (isStudentPath(window.location.pathname) ? window.location.pathname : '/student') : '/staff';
+      ? (isStudentPath(window.location.pathname) ? window.location.pathname : '/student')
+      : (isStaffPath(window.location.pathname) ? window.location.pathname : '/staff');
     window.history.replaceState(null, '', destination);
     setPath(destination);
     setState({ status: 'authenticated', user, error: '' });
@@ -67,7 +77,7 @@ export default function App() {
   }, [checkSession]);
 
   function navigate(destination) {
-    if (!isStudentPath(destination) || destination === path) return;
+    if (!(isStudentPath(destination) || isStaffPath(destination)) || destination === path) return;
     window.history.pushState(null, '', destination);
     setPath(destination);
   }
@@ -86,11 +96,16 @@ export default function App() {
     else if (path === '/student/schedule') page = <StudentSchedulePage user={state.user} onSessionExpired={showLogin} />;
     else if (path === '/student/grades') page = <StudentGradesPage onSessionExpired={showLogin} />;
     else if (path === '/student/documents') page = <StudentDocumentsPage onSessionExpired={showLogin} />;
+    else if (path === '/student/notifications') page = <StudentNotificationsPage onNavigate={navigate} onSessionExpired={showLogin} />;
     return <StudentLayout key={state.user.id} path={path} onNavigate={navigate}>{page}</StudentLayout>;
   }
 
   if (state.status === 'authenticated' && state.user.role === 'staff') {
-    return <StaffDocumentsPage key={state.user.id} user={state.user} onSessionExpired={showLogin} {...logoutProps} />;
+    return <StaffLayout key={state.user.id} user={state.user} path={path} onNavigate={navigate} {...logoutProps}>
+      {path === '/staff/schedule' ? <StaffSchedulePage onSessionExpired={showLogin} />
+        : path === '/staff/grades' ? <StaffGradesPage onSessionExpired={showLogin} />
+        : <StaffDocumentsPage onSessionExpired={showLogin} />}
+    </StaffLayout>;
   }
 
   return (

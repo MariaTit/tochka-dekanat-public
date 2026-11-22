@@ -3,6 +3,7 @@ export const STUDENT_NAVIGATION = [
   { path: '/student/schedule', label: 'Расписание', icon: 'calendar' },
   { path: '/student/grades', label: 'Оценки', icon: 'grades' },
   { path: '/student/documents', label: 'Документы', icon: 'document' },
+  { path: '/student/notifications', label: 'Уведомления', icon: 'bell' },
   { path: '/student/more', label: 'Ещё', icon: 'more' },
 ];
 

@@ -8,7 +8,7 @@ import { once } from 'node:events';
 import { randomBytes } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { openDatabase } from '../src/db/database.js';
-import { createDemoUsers } from '../src/services/demo-users.js';
+import { createLegacyDemoUsers, LEGACY_USER_COLUMNS } from './helpers/legacy-demo-users.js';
 import { createDemoSchedule } from '../src/services/demo-schedule.js';
 import { createDemoGrades } from '../src/services/demo-grades.js';
 
@@ -25,14 +25,14 @@ test('Оценки: миграция существующей базы, изол
     db.exec(readFileSync(new URL(`../src/db/migrations/${name}`, import.meta.url), 'utf8'));
     db.prepare('INSERT INTO schema_migrations (name) VALUES (?)').run(name);
   }
-  const accounts = await createDemoUsers(db);
+  const accounts = await createLegacyDemoUsers(db);
   createDemoSchedule(db);
   const studentId = accounts.find((account) => account.login === 'student1').id;
   const marker = randomBytes(16).toString('hex');
   db.prepare('INSERT INTO sessions (sid, user_id, data, expires_at) VALUES (?, ?, ?, ?)')
     .run(marker, studentId, JSON.stringify({ marker }), Date.now() + 3600000);
   const snapshot = () => Object.fromEntries(['users', 'sessions', 'schedule_lessons', 'schedule_imports']
-    .map((table) => [table, db.prepare(`SELECT * FROM ${table} ORDER BY 1`).all()]));
+    .map((table) => [table, db.prepare(`SELECT ${table === 'users' ? LEGACY_USER_COLUMNS : '*'} FROM ${table} ORDER BY 1`).all()]));
   const legacy = snapshot();
   db.close();
   db = openDatabase(databasePath);
@@ -40,7 +40,7 @@ test('Оценки: миграция существующей базы, изол
 
   await t.test('Новая миграция сохраняет прежние данные, хеши паролей и сессии', () => {
     assert.deepEqual(snapshot(), legacy);
-    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 5);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 9);
     for (const table of ['disciplines', 'student_disciplines', 'current_results', 'attestations']) {
       assert.equal(db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count, 0);
     }
@@ -159,7 +159,7 @@ test('Оценки: миграция существующей базы, изол
     for (const value of ['6', 'Зачтено', null]) assert.throws(() => db.prepare('UPDATE attestations SET result = ? WHERE id = ?').run(value, finalId));
   });
 
-  await t.test('Для обеих ролей отсутствуют API создания, редактирования и удаления оценок', async () => {
+  await t.test('Студенческий API оценок остаётся только для чтения для обеих ролей', async () => {
     const before = db.prepare('SELECT * FROM current_results ORDER BY id').all();
     for (const login of ['student1', 'staff']) {
       for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
@@ -186,7 +186,7 @@ test('Оценки: миграция существующей базы, изол
     assert.deepEqual(await (await request(endpoint, cookies.student1)).json(), before);
     assert.equal(before.disciplines[0].currentResults[0].points, 7);
     assert.deepEqual(await (await request(endpoint, cookies.student2)).json(), results.student2);
-    assert.deepEqual(db.prepare('SELECT * FROM users ORDER BY id').all(), legacy.users);
+    assert.deepEqual(db.prepare(`SELECT ${LEGACY_USER_COLUMNS} FROM users ORDER BY id`).all(), legacy.users);
     assert.deepEqual(db.prepare('SELECT * FROM schedule_lessons ORDER BY id').all(), legacy.schedule_lessons);
     assert.equal((await request('/auth/me', cookies.student1)).status, 200);
     assert.equal((await request('/student/schedule?from=2026-11-20&to=2026-11-28', cookies.student1)).status, 200);

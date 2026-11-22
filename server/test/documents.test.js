@@ -1,3 +1,4 @@
+import { LEGACY_ATTESTATION_COLUMNS } from './helpers/legacy-grades.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync } from 'node:fs';
@@ -8,7 +9,7 @@ import { once } from 'node:events';
 import { randomBytes } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { openDatabase } from '../src/db/database.js';
-import { createDemoUsers } from '../src/services/demo-users.js';
+import { createLegacyDemoUsers, LEGACY_USER_COLUMNS } from './helpers/legacy-demo-users.js';
 import { createDemoSchedule } from '../src/services/demo-schedule.js';
 import { createDemoGrades } from '../src/services/demo-grades.js';
 
@@ -24,7 +25,7 @@ test('Документы: миграция, подача, валидация, д
     db.exec(readFileSync(new URL(`../src/db/migrations/${name}`, import.meta.url), 'utf8'));
     db.prepare('INSERT INTO schema_migrations (name) VALUES (?)').run(name);
   }
-  const accounts = await createDemoUsers(db);
+  const accounts = await createLegacyDemoUsers(db);
   const studentIds = Object.fromEntries(accounts.map((account) => [account.login, account.id]));
   createDemoSchedule(db);
   createDemoGrades(db);
@@ -34,7 +35,7 @@ test('Документы: миграция, подача, валидация, д
   const oldTables = ['roles', 'users', 'sessions', 'schedule_lessons', 'schedule_imports',
     'disciplines', 'student_disciplines', 'current_results', 'attestations', 'grades_imports'];
   const snapshot = (tables = oldTables) => Object.fromEntries(tables
-    .map((table) => [table, db.prepare(`SELECT * FROM ${table} ORDER BY 1`).all()]));
+    .map((table) => [table, db.prepare(`SELECT ${table === 'users' ? LEGACY_USER_COLUMNS : table === 'attestations' ? LEGACY_ATTESTATION_COLUMNS : '*'} FROM ${table} ORDER BY 1`).all()]));
   const legacy = snapshot();
   db.close();
   db = openDatabase(databasePath);
@@ -43,7 +44,7 @@ test('Документы: миграция, подача, валидация, д
   await t.test('Миграция старой базы сохраняет все таблицы, пароли и сессии; повторное открытие безопасно', () => {
     assert.deepEqual(snapshot(), legacy);
     assert.deepEqual(db.prepare('SELECT name FROM schema_migrations ORDER BY name').all().map((row) => row.name),
-      ['001-auth.sql', '002-schedule.sql', '003-grades.sql', '004-documents.sql', '005-document-processing.sql']);
+      ['001-auth.sql', '002-schedule.sql', '003-grades.sql', '004-documents.sql', '005-document-processing.sql', '006-notifications.sql', '007-student-profile.sql', '008-staff-schedule.sql', '009-staff-grades.sql']);
     assert.equal(db.prepare('SELECT COUNT(*) AS count FROM document_requests').get().count, 0);
     const before = snapshot(['document_types', 'schema_migrations']);
     const second = openDatabase(databasePath);

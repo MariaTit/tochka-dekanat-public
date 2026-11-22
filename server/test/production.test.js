@@ -33,7 +33,7 @@ test('Production: React, API и закрытые файлы на одном се
 
   await t.test('Прямые адреса и обновление всех страниц загружают React', async () => {
     for (const route of ['/', '/login', '/student', '/student/profile', '/student/schedule',
-      '/student/grades', '/student/documents', '/student/more', '/staff']) {
+      '/student/grades', '/student/documents', '/student/more', '/staff', '/staff/schedule', '/staff/grades']) {
       const response = await fetch(`${url}${route}`, { headers: { Accept: 'text/html' } });
       assert.equal(response.status, 200, route);
       assert.match(response.headers.get('content-type'), /text\/html/);

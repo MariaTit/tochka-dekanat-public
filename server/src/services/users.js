@@ -1,5 +1,6 @@
 const PUBLIC_COLUMNS = `users.id, users.login, users.full_name AS fullName, users.email,
-  users.student_group AS studentGroup, users.department, roles.name AS role`;
+  users.student_group AS studentGroup, users.department,
+  users.study_program AS studyProgram, users.course, roles.name AS role`;
 
 export function findUserById(db, id) {
   return db.prepare(`SELECT ${PUBLIC_COLUMNS} FROM users JOIN roles ON users.role_id = roles.id WHERE users.id = ?`).get(id);

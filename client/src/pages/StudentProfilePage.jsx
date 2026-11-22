@@ -4,9 +4,9 @@ export default function StudentProfilePage({ user }) {
   const fields = [
     ['ФИО', user.fullName],
     ['Факультет / институт', user.department],
-    ['Направление', user.studyProgram],
+    ['Направление подготовки', user.studyProgram],
     ['Курс', user.course],
-    ['Группа', user.studentGroup],
+    ['Учебная группа', user.studentGroup],
     ['Email', user.email],
   ];
   return <>

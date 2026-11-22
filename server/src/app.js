@@ -10,6 +10,9 @@ import { createScheduleRouter } from './routes/schedule.js';
 import { createGradesRouter } from './routes/grades.js';
 import { createDocumentsRouter } from './routes/documents.js';
 import { createStaffDocumentsRouter } from './routes/staff-documents.js';
+import { createNotificationsRouter } from './routes/notifications.js';
+import { createStaffScheduleRouter } from './routes/staff-schedule.js';
+import { createStaffGradesRouter } from './routes/staff-grades.js';
 
 export async function createApp(db, config) {
   const clientDistPath = config.clientDistPath || fileURLToPath(new URL('../../client/dist/', import.meta.url));
@@ -34,7 +37,10 @@ export async function createApp(db, config) {
   app.use('/api/student/schedule', createScheduleRouter(db));
   app.use('/api/student/grades', createGradesRouter(db));
   app.use('/api/student/documents', createDocumentsRouter(db));
+  app.use('/api/student/notifications', createNotificationsRouter(db));
   app.use('/api/staff/documents', createStaffDocumentsRouter(db));
+  app.use('/api/staff/schedule', createStaffScheduleRouter(db));
+  app.use('/api/staff/grades', createStaffGradesRouter(db));
   app.get('/api/student', requireAuth(db), requireRole('student'), (request, response) => response.json({ user: request.user }));
   app.get('/api/staff', requireAuth(db), requireRole('staff'), (request, response) => response.json({ user: request.user }));
   app.get('/api/users/:userId', requireAuth(db), (request, response) => {
@@ -51,7 +57,7 @@ export async function createApp(db, config) {
     app.use(express.static(clientDistPath, { index: false, dotfiles: 'ignore' }));
     // Обновление вложенного адреса кабинета должно загружать React.
     // Неизвестные API и отсутствующие файлы не подменяются HTML.
-    app.get(/^(?:\/$|\/login\/?$|\/student(?:\/.*)?$|\/staff\/?$)/, (request, response, next) => {
+    app.get(/^(?:\/$|\/login\/?$|\/student(?:\/.*)?$|\/staff(?:\/(?:schedule|grades))?\/?$)/, (request, response, next) => {
       if (path.extname(request.path) || !request.accepts('html')) return next();
       response.set('Cache-Control', 'no-cache');
       response.sendFile('index.html', { root: clientDistPath });

@@ -17,7 +17,7 @@ export default function StudentLayout({ path, onNavigate, children }) {
 
   function navigation(className, label) {
     return <nav className={className} aria-label={label}>
-      {STUDENT_NAVIGATION.map((item) => {
+      {STUDENT_NAVIGATION.filter((item) => className !== 'mobile-navigation' || item.path !== '/student/notifications').map((item) => {
         const active = item.path === path || (item.path === '/student/more' && path === '/student/profile');
         return <StudentLink key={item.path} to={item.path} onNavigate={onNavigate}
           className={`student-nav-link${active ? ' is-active' : ''}`} aria-current={item.path === path ? 'page' : undefined}>
@@ -38,10 +38,14 @@ export default function StudentLayout({ path, onNavigate, children }) {
     <div className="student-workspace">
       <header className="student-header">
         <div><p className="header-caption">Кабинет студента</p><span className="header-section">{title}</span></div>
-        <StudentLink className="profile-link" to="/student/profile" onNavigate={onNavigate}
+        <div className="student-header-actions">
+        <StudentLink className="notification-header-link" to="/student/notifications" onNavigate={onNavigate}
+          aria-label="Уведомления" aria-current={path === '/student/notifications' ? 'page' : undefined}><Icon name="bell" /></StudentLink>
+        <StudentLink className="profile-link" to="/student/profile" onNavigate={onNavigate} aria-label="Мой профиль"
           aria-current={path === '/student/profile' ? 'page' : undefined}>
           <span className="avatar"><Icon name="user" /></span><span>Мой профиль</span>
         </StudentLink>
+        </div>
       </header>
       <main className="student-content" id="student-content" ref={mainRef} tabIndex={-1}>{children}</main>
       <footer className="student-footer"><p>Точка · Конкурсный прототип</p><p>Все персональные данные вымышлены.</p></footer>

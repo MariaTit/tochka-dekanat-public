@@ -2,7 +2,7 @@ import { formatDate } from '../scheduleDates.js';
 
 export const LESSON_STATUSES = { scheduled: 'По расписанию', changed: 'Изменено', moved: 'Перенесено', cancelled: 'Отменено' };
 
-export default function LessonCard({ lesson, displayDate = lesson.date, onSelect }) {
+export default function LessonCard({ lesson, displayDate = lesson.date, onSelect, detailsHint = 'Подробнее о занятии' }) {
   const movedFrom = lesson.status === 'moved' && displayDate !== lesson.date;
   const time = movedFrom ? lesson.original : lesson;
   return <button type="button" className={`lesson-card lesson-card--${lesson.status}`} onClick={() => onSelect(lesson)}>
@@ -14,6 +14,6 @@ export default function LessonCard({ lesson, displayDate = lesson.date, onSelect
       {lesson.status === 'moved' && <span>{movedFrom ? 'На' : 'С'} {formatDate(movedFrom ? lesson.date : lesson.original.date)} · {movedFrom ? lesson.startTime : lesson.original.startTime}</span>}
       {lesson.status !== 'moved' && <span>{lesson.changeNote}</span>}
     </span>}
-    <span className="lesson-details-hint">Подробнее о занятии</span>
+    <span className="lesson-details-hint">{detailsHint}</span>
   </button>;
 }

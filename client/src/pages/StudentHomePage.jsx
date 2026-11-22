@@ -1,4 +1,4 @@
-import EmptyState from '../components/EmptyState.jsx';
+import NotificationsFeed from '../components/NotificationsFeed.jsx';
 import Icon from '../components/Icon.jsx';
 import StudentLink from '../components/StudentLink.jsx';
 import UpcomingLessons from '../components/UpcomingLessons.jsx';
@@ -25,9 +25,8 @@ export default function StudentHomePage({ user, onNavigate, onSessionExpired }) 
         <div className="card-heading"><h2 id="classes-title">Ближайшие занятия</h2><StudentLink to="/student/schedule" onNavigate={onNavigate}>К расписанию</StudentLink></div>
         <UpcomingLessons onSessionExpired={onSessionExpired} />
       </section>
-      <section className="student-card" aria-labelledby="notifications-title">
-        <div className="card-heading"><h2 id="notifications-title">Важные уведомления</h2></div>
-        <EmptyState icon="bell" title="Уведомления ещё не подключены">Здесь будут важные сообщения от учебного офиса. В этом прототипе они пока недоступны.</EmptyState>
+      <section className="student-card" aria-label="Важные уведомления">
+        <NotificationsFeed compact onNavigate={onNavigate} onSessionExpired={onSessionExpired} />
       </section>
     </div>
     <GradesOverview onNavigate={onNavigate} onSessionExpired={onSessionExpired} />
