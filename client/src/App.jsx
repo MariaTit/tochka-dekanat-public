@@ -14,6 +14,8 @@ import StudentDocumentsPage from './pages/StudentDocumentsPage.jsx';
 import StudentSchedulePage from './pages/StudentSchedulePage.jsx';
 import StudentGradesPage from './pages/StudentGradesPage.jsx';
 import StudentNotificationsPage from './pages/StudentNotificationsPage.jsx';
+import MessagesPage from './pages/MessagesPage.jsx';
+import './styles/messages.css';
 import './styles/notifications.css';
 import './styles/schedule.css';
 import './styles/grades.css';
@@ -23,7 +25,7 @@ import './styles/staff-schedule.css';
 import './styles/staff-grades.css';
 import { isStudentPath } from './studentRoutes.js';
 
-const isStaffPath = (path) => ['/staff', '/staff/schedule', '/staff/grades'].includes(path);
+const isStaffPath = (path) => ['/staff', '/staff/schedule', '/staff/grades'].includes(path) || /^\/staff\/messages(?:\/[1-9]\d{0,14})?$/.test(path);
 
 export default function App() {
   const [state, setState] = useState({ status: 'loading', user: null, error: '' });
@@ -97,6 +99,8 @@ export default function App() {
     else if (path === '/student/grades') page = <StudentGradesPage onSessionExpired={showLogin} />;
     else if (path === '/student/documents') page = <StudentDocumentsPage onSessionExpired={showLogin} />;
     else if (path === '/student/notifications') page = <StudentNotificationsPage onNavigate={navigate} onSessionExpired={showLogin} />;
+    else if (path.startsWith('/student/messages')) page = <MessagesPage user={state.user} conversationId={path.split('/')[3]}
+      onNavigate={navigate} onSessionExpired={showLogin} />;
     return <StudentLayout key={state.user.id} path={path} onNavigate={navigate}>{page}</StudentLayout>;
   }
 
@@ -104,6 +108,8 @@ export default function App() {
     return <StaffLayout key={state.user.id} user={state.user} path={path} onNavigate={navigate} {...logoutProps}>
       {path === '/staff/schedule' ? <StaffSchedulePage onSessionExpired={showLogin} />
         : path === '/staff/grades' ? <StaffGradesPage onSessionExpired={showLogin} />
+        : path.startsWith('/staff/messages') ? <MessagesPage user={state.user} conversationId={path.split('/')[3]}
+          onNavigate={navigate} onSessionExpired={showLogin} />
         : <StaffDocumentsPage onSessionExpired={showLogin} />}
     </StaffLayout>;
   }

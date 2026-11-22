@@ -41,7 +41,7 @@ test('Уведомления: миграция, демоданные, API, со�
 
   await t.test('Миграция не меняет старые данные; повторное открытие не заполняет уведомления', () => {
     assert.deepEqual(snapshot(), before);
-    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 9);
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 10);
     assert.equal(db.prepare('SELECT COUNT(*) AS n FROM notifications').get().n, 0);
     const second = openDatabase(databasePath); second.close();
     assert.deepEqual(snapshot(), before);

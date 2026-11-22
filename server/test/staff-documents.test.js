@@ -54,7 +54,7 @@ test('Сотрудник: миграция с заявками, обработк
       assert.equal(rejection_reason, null);
       return row;
     }), legacyRequests.map((row) => ({ ...row })));
-    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 9);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 10);
     assert.equal(db.prepare('PRAGMA integrity_check').get().integrity_check, 'ok');
     assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(), []);
     const before = snapshot([...oldTables, 'document_requests', 'schema_migrations']);

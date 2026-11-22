@@ -13,6 +13,7 @@ import { createStaffDocumentsRouter } from './routes/staff-documents.js';
 import { createNotificationsRouter } from './routes/notifications.js';
 import { createStaffScheduleRouter } from './routes/staff-schedule.js';
 import { createStaffGradesRouter } from './routes/staff-grades.js';
+import { createMessagesRouter } from './routes/messages.js';
 
 export async function createApp(db, config) {
   const clientDistPath = config.clientDistPath || fileURLToPath(new URL('../../client/dist/', import.meta.url));
@@ -26,6 +27,8 @@ export async function createApp(db, config) {
   });
   app.use('/api/health', healthRouter);
   app.use('/api', protectMutation(config.origins));
+  // 4000 символов Unicode могут занимать до 12 КБ в UTF-8.
+  app.use(['/api/student/messages', '/api/staff/messages'], express.json({ limit: '24kb' }));
   app.use(express.json({ limit: '8kb' }));
   const cookieOptions = { httpOnly: true, sameSite: 'lax', secure: config.production, path: '/' };
   app.use('/api', session({
@@ -41,6 +44,8 @@ export async function createApp(db, config) {
   app.use('/api/staff/documents', createStaffDocumentsRouter(db));
   app.use('/api/staff/schedule', createStaffScheduleRouter(db));
   app.use('/api/staff/grades', createStaffGradesRouter(db));
+  app.use('/api/student/messages', createMessagesRouter(db, 'student'));
+  app.use('/api/staff/messages', createMessagesRouter(db, 'staff'));
   app.get('/api/student', requireAuth(db), requireRole('student'), (request, response) => response.json({ user: request.user }));
   app.get('/api/staff', requireAuth(db), requireRole('staff'), (request, response) => response.json({ user: request.user }));
   app.get('/api/users/:userId', requireAuth(db), (request, response) => {
@@ -57,7 +62,7 @@ export async function createApp(db, config) {
     app.use(express.static(clientDistPath, { index: false, dotfiles: 'ignore' }));
     // Обновление вложенного адреса кабинета должно загружать React.
     // Неизвестные API и отсутствующие файлы не подменяются HTML.
-    app.get(/^(?:\/$|\/login\/?$|\/student(?:\/.*)?$|\/staff(?:\/(?:schedule|grades))?\/?$)/, (request, response, next) => {
+    app.get(/^(?:\/$|\/login\/?$|\/student(?:\/.*)?$|\/staff(?:\/(?:schedule|grades|messages(?:\/[1-9]\d*)?))?\/?$)/, (request, response, next) => {
       if (path.extname(request.path) || !request.accepts('html')) return next();
       response.set('Cache-Control', 'no-cache');
       response.sendFile('index.html', { root: clientDistPath });

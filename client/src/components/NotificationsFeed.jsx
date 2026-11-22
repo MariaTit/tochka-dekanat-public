@@ -95,6 +95,7 @@ export default function NotificationsFeed({ compact = false, onNavigate, onSessi
               </button>}
               {item.lessonId && <StudentLink to="/student/schedule" onNavigate={onNavigate}>К расписанию</StudentLink>}
               {item.documentRequestId && <StudentLink to="/student/documents" onNavigate={onNavigate}>К заявкам</StudentLink>}
+              {item.conversationId && <StudentLink to={`/student/messages/${item.conversationId}`} onNavigate={onNavigate}>К переписке</StudentLink>}
             </div>
             {saveError?.id === item.id && <p className="error-message" role="alert">{saveError.message} Попробуйте отметить снова или обновите список.</p>}
           </article>

@@ -27,7 +27,7 @@ function legacyDatabase(filename) {
   }
   return db;
 }
-const snapshot = (db, legacy = false) => Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name <> 'schema_migrations' ORDER BY name").all()
+const snapshot = (db, legacy = false) => Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT IN ('schema_migrations', 'conversations', 'messages') ORDER BY name").all()
   .map(({ name }) => [name, db.prepare(`SELECT ${legacy && name === 'attestations' ? LEGACY_ATTESTATION_COLUMNS : '*'} FROM "${name}" ORDER BY rowid`).all()]));
 
 test('Управление успеваемостью: миграция, аттестация, уведомления, защита и перезапуск', async (t) => {
@@ -50,7 +50,7 @@ test('Управление успеваемостью: миграция, атт�
   t.after(() => db.close());
   await t.test('009 дополняет таблицу без потери всех прежних данных, сессий и прочтения; повтор безопасен', () => {
     assert.deepEqual(snapshot(db, true), legacy);
-    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 9);
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 10);
     for (const item of db.prepare('SELECT * FROM attestations').all()) {
       assert.equal(item.is_differentiated, 0); assert.equal(item.grade, null); assert.equal(item.revision, 0);
     }

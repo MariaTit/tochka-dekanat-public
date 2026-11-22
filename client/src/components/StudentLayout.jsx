@@ -2,10 +2,11 @@ import { useEffect, useRef } from 'react';
 import { STUDENT_NAVIGATION } from '../studentRoutes.js';
 import Icon from './Icon.jsx';
 import StudentLink from './StudentLink.jsx';
+import MessageBadge from './MessageBadge.jsx';
 
 export default function StudentLayout({ path, onNavigate, children }) {
   const mainRef = useRef(null);
-  const title = path === '/student/profile' ? 'Мой профиль'
+  const title = path.startsWith('/student/messages') ? 'Сообщения' : path === '/student/profile' ? 'Мой профиль'
     : STUDENT_NAVIGATION.find((item) => item.path === path)?.label;
 
   useEffect(() => {
@@ -17,8 +18,9 @@ export default function StudentLayout({ path, onNavigate, children }) {
 
   function navigation(className, label) {
     return <nav className={className} aria-label={label}>
-      {STUDENT_NAVIGATION.filter((item) => className !== 'mobile-navigation' || item.path !== '/student/notifications').map((item) => {
-        const active = item.path === path || (item.path === '/student/more' && path === '/student/profile');
+      {STUDENT_NAVIGATION.filter((item) => className !== 'mobile-navigation' || !['/student/notifications', '/student/messages'].includes(item.path)).map((item) => {
+        const active = item.path === path || (item.path === '/student/messages' && path.startsWith('/student/messages/'))
+          || (item.path === '/student/more' && (path === '/student/profile' || (className === 'mobile-navigation' && path.startsWith('/student/messages'))));
         return <StudentLink key={item.path} to={item.path} onNavigate={onNavigate}
           className={`student-nav-link${active ? ' is-active' : ''}`} aria-current={item.path === path ? 'page' : undefined}>
           <Icon name={item.icon} /><span>{item.label}</span>
@@ -39,6 +41,8 @@ export default function StudentLayout({ path, onNavigate, children }) {
       <header className="student-header">
         <div><p className="header-caption">Кабинет студента</p><span className="header-section">{title}</span></div>
         <div className="student-header-actions">
+        <StudentLink className="messages-header-link" to="/student/messages" onNavigate={onNavigate} aria-label="Сообщения">
+          <Icon name="message" /><MessageBadge role="student" path={path} /></StudentLink>
         <StudentLink className="notification-header-link" to="/student/notifications" onNavigate={onNavigate}
           aria-label="Уведомления" aria-current={path === '/student/notifications' ? 'page' : undefined}><Icon name="bell" /></StudentLink>
         <StudentLink className="profile-link" to="/student/profile" onNavigate={onNavigate} aria-label="Мой профиль"

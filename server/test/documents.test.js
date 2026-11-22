@@ -44,7 +44,7 @@ test('Документы: миграция, подача, валидация, д
   await t.test('Миграция старой базы сохраняет все таблицы, пароли и сессии; повторное открытие безопасно', () => {
     assert.deepEqual(snapshot(), legacy);
     assert.deepEqual(db.prepare('SELECT name FROM schema_migrations ORDER BY name').all().map((row) => row.name),
-      ['001-auth.sql', '002-schedule.sql', '003-grades.sql', '004-documents.sql', '005-document-processing.sql', '006-notifications.sql', '007-student-profile.sql', '008-staff-schedule.sql', '009-staff-grades.sql']);
+      ['001-auth.sql', '002-schedule.sql', '003-grades.sql', '004-documents.sql', '005-document-processing.sql', '006-notifications.sql', '007-student-profile.sql', '008-staff-schedule.sql', '009-staff-grades.sql', '010-messages.sql']);
     assert.equal(db.prepare('SELECT COUNT(*) AS count FROM document_requests').get().count, 0);
     const before = snapshot(['document_types', 'schema_migrations']);
     const second = openDatabase(databasePath);

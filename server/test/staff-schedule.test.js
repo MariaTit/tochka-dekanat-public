@@ -18,7 +18,7 @@ import { getScheduleGroups } from '../src/services/staff-schedule.js';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cache = path.join(root, '.cache/staff-schedule-tests');
 mkdirSync(cache, { recursive: true });
-const snapshot = (db) => Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name <> 'schema_migrations' ORDER BY name").all()
+const snapshot = (db) => Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT IN ('schema_migrations', 'conversations', 'messages') ORDER BY name").all()
   .map(({ name }) => [name, db.prepare(`SELECT ${name === 'attestations' ? LEGACY_ATTESTATION_COLUMNS : '*'} FROM "${name}" ORDER BY rowid`).all()]));
 
 test('Управление расписанием: миграция, права, события, студенты и перезапуск', async (t) => {
@@ -48,7 +48,7 @@ test('Управление расписанием: миграция, права,
     assert.deepEqual(snapshot(db), before);
     const second = openDatabase(databasePath); second.close();
     assert.deepEqual(snapshot(db), before);
-    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 9);
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 10);
     const empty = openDatabase(':memory:');
     try { assert.deepEqual(getScheduleGroups(empty), []); } finally { empty.close(); }
   });

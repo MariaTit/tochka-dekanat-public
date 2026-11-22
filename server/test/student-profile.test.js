@@ -31,7 +31,7 @@ function legacyDatabase(filename) {
   }
   return db;
 }
-const snapshot = (db) => Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name <> 'schema_migrations' ORDER BY name").all()
+const snapshot = (db) => Object.fromEntries(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT IN ('schema_migrations', 'conversations', 'messages') ORDER BY name").all()
   .map(({ name }) => [name, db.prepare(`SELECT ${name === 'users' ? LEGACY_USER_COLUMNS : name === 'attestations' ? LEGACY_ATTESTATION_COLUMNS : '*'} FROM "${name}" ORDER BY rowid`).all()]));
 
 test('Профиль: миграция существующей SQLite сохраняет все данные, включая прочтение', async (t) => {
@@ -60,7 +60,7 @@ test('Профиль: миграция существующей SQLite сохр�
     for (const key of ['fullName', 'department', 'studyProgram', 'studentGroup']) assert.ok(user[key]?.trim());
   }
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM users').get().n, 3);
-  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 9);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n, 10);
   assert.equal(db.prepare('PRAGMA integrity_check').get().integrity_check, 'ok');
   assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(), []);
   db.prepare('UPDATE users SET course = 3, study_program = ? WHERE id = ?').run('Демо: сохранённое направление', student.id);
